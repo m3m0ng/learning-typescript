@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lesson 3: Arrow Functions, Modules, and Reading Real Files</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #181b25;
+    --text: #e6e6e6;
+    --muted: #9aa0ad;
+    --accent: #3b82f6;
+    --good: #22c55e;
+    --bad: #ef4444;
+    --code-bg: #11141d;
+    --border: #2a2e3a;
+    --js-color: #facc15;
+    --ts-color: #5eead4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1 { font-size: 2rem; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); margin-top: 0; margin-bottom: 32px; }
+  h2 { margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  p { color: #d1d5db; }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9em;
+    color: #93c5fd;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; color: #e6e6e6; }
+  .tok-kw { color: #c084fc; }
+  .tok-type { color: #5eead4; }
+  .tok-str { color: #fca5a5; }
+  .tok-com { color: #6b7280; font-style: italic; }
+  .callout {
+    background: var(--panel);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 20px 0;
+    color: #d1d5db;
+  }
+  .side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .side-by-side > div {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .side-by-side h4 {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .side-by-side pre { margin: 0; border: none; padding: 0; background: none; }
+  @media (max-width: 600px) {
+    .side-by-side { grid-template-columns: 1fr; }
+  }
+  .file-label {
+    display: inline-block;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: -4px;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .tag-js { background: rgba(250, 204, 21, 0.15); color: var(--js-color); border: 1px solid rgba(250, 204, 21, 0.4); }
+  .tag-ts { background: rgba(94, 234, 212, 0.15); color: var(--ts-color); border: 1px solid rgba(94, 234, 212, 0.4); }
+  .quiz {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .quiz p.q { font-weight: 600; margin-top: 0; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .options button {
+    text-align: left;
+    background: var(--code-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .options button:hover { border-color: var(--accent); }
+  .options button.correct { border-color: var(--good); background: rgba(34,197,94,0.12); }
+  .options button.incorrect { border-color: var(--bad); background: rgba(239,68,68,0.12); }
+  .feedback { margin-top: 10px; font-size: 0.9rem; min-height: 1.2em; }
+  .feedback.good { color: var(--good); }
+  .feedback.bad { color: var(--bad); }
+  .nav {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .nav a { color: var(--accent); text-decoration: none; }
+  .badge {
+    display: inline-block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .ask {
+    margin-top: 48px;
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Lesson 3 of your TypeScript journey</span>
+  <h1>Arrow Functions, Modules, and Reading Real Files</h1>
+  <p class="subtitle">Goal: recognize the two patterns that show up at the top and throughout almost every real <code>.ts</code> file — <code>import</code>/<code>export</code> and arrow functions — so a real file stops looking like noise.</p>
+
+  <div class="callout">
+    <strong>New direction from here on:</strong> examples will come from CLI tools, scripts, and small
+    TUI/agent-style code — the kind of TypeScript that AI assistants actually generate — instead of
+    robotics. Python is still your anchor for syntax intuition, just not the example domain anymore.
+  </div>
+
+  <h2>1. The big picture: what survives compilation?</h2>
+  <p>
+    Quick recap, because it matters for everything below: TypeScript is JavaScript
+    <strong>plus types</strong>. Before your code runs (in a browser, in Node, anywhere), a compiler
+    called <code>tsc</code> strips out every type annotation and produces plain JavaScript. That JS is
+    what actually executes.
+  </p>
+  <p>
+    From this lesson on, code samples are tagged so you always know which bucket something is in:
+  </p>
+  <p>
+    <span class="tag tag-js">JS</span> &mdash; real syntax, exists at runtime, would still be there in
+    the compiled output (functions, <code>import</code>/<code>export</code>, <code>.map()</code>,
+    <code>if</code>, loops, etc.)
+  </p>
+  <p>
+    <span class="tag tag-ts">TS</span> &mdash; type-only, vanishes when compiled (<code>: number</code>,
+    <code>interface</code>, generic <code>&lt;T&gt;</code> parameters, etc.)
+  </p>
+  <div class="callout">
+    Why this matters for your goal: when you're reading a TUI component or a CLI script, the
+    <span class="tag tag-js">JS</span> parts are "what the program actually does." The
+    <span class="tag tag-ts">TS</span> parts are "guardrails the editor/compiler enforces." Knowing
+    which is which helps you separate "how does this behave" from "why is the editor complaining."
+  </div>
+
+  <h2>2. Arrow functions <span class="tag tag-js">JS</span> — the modern way to write functions</h2>
+  <p>
+    Lesson 2 used the <code>function</code> keyword. In real-world TS (and almost all AI output), the
+    far more common style is an <strong>arrow function</strong> assigned to a <code>const</code>. Same
+    function, two ways to write it:
+  </p>
+  <div class="side-by-side">
+    <div>
+      <h4>Named function (Lesson 2 style)</h4>
+      <pre><code><span class="tok-kw">function</span> double(n<span class="tok-type">: number</span>)<span class="tok-type">: number</span> {
+  <span class="tok-kw">return</span> n * 2;
+}</code></pre>
+    </div>
+    <div>
+      <h4>Arrow function (the common style)</h4>
+      <pre><code><span class="tok-kw">const</span> double = (n<span class="tok-type">: number</span>)<span class="tok-type">: number</span> => {
+  <span class="tok-kw">return</span> n * 2;
+};</code></pre>
+    </div>
+  </div>
+  <p>
+    <code>=&gt;</code> ("fat arrow") replaces the <code>function</code> keyword and the name moves to a
+    <code>const</code> on the left. Everything else — parameter types, return type — works exactly the
+    same as Lesson 2.
+  </p>
+  <p>
+    There's a shorthand too: if the function body is a <strong>single expression</strong> that you'd
+    just <code>return</code>, you can drop the braces and the <code>return</code> keyword entirely:
+  </p>
+  <pre><code><span class="tok-kw">const</span> double = (n<span class="tok-type">: number</span>)<span class="tok-type">: number</span> => n * 2;</code></pre>
+  <p>
+    This isn't quite Python's <code>lambda</code> (which is limited to one expression and can't be
+    reused as easily) — think of it more like: <strong>any time you'd write <code>def</code> and assign
+    the function to a name, JS/TS lets you write it as <code>const name = (...) =&gt; ...</code>
+    instead.</strong> Both forms exist in real code; arrow functions are just far more common.
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: which is the arrow-function equivalent of <code>function square(n: number): number { return n * n; }</code>?</p>
+    <div class="options">
+      <button data-correct="false"><code>const square(n: number): number => n * n;</code></button>
+      <button data-correct="true"><code>const square = (n: number): number => n * n;</code></button>
+      <button data-correct="false"><code>arrow square = (n: number): number { n * n };</code></button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>3. Arrow functions as arguments — <code>.map()</code> and <code>.filter()</code> <span class="tag tag-js">JS</span></h2>
+  <p>
+    The single most common place you'll see arrow functions is <strong>passed directly into another
+    function</strong> — usually an array method. Imagine a small CLI to-do tool:
+  </p>
+  <pre><code><span class="tok-kw">interface</span> Task {
+  id<span class="tok-type">: number</span>;
+  title<span class="tok-type">: string</span>;
+  done<span class="tok-type">: boolean</span>;
+}
+
+<span class="tok-kw">const</span> tasks<span class="tok-type">: Task[]</span> = [
+  { id: 1, title: <span class="tok-str">"Write lesson 3"</span>, done: <span class="tok-kw">true</span> },
+  { id: 2, title: <span class="tok-str">"Review PR"</span>, done: <span class="tok-kw">false</span> },
+  { id: 3, title: <span class="tok-str">"Deploy app"</span>, done: <span class="tok-kw">false</span> },
+];
+
+<span class="tok-com">// keep only tasks that aren't done</span>
+<span class="tok-kw">const</span> incomplete = tasks.filter(task => !task.done);
+
+<span class="tok-com">// pull out just the titles</span>
+<span class="tok-kw">const</span> titles = tasks.map(task => task.title);</code></pre>
+  <p>
+    Read <code>tasks.filter(task => !task.done)</code> as: "for each <code>task</code> in
+    <code>tasks</code>, keep it only if <code>!task.done</code> is true." That's the same idea as
+    Python's:
+  </p>
+  <pre><code>incomplete = [task <span class="tok-kw">for</span> task <span class="tok-kw">in</span> tasks <span class="tok-kw">if</span> <span class="tok-kw">not</span> task.done]
+titles = [task.title <span class="tok-kw">for</span> task <span class="tok-kw">in</span> tasks]</code></pre>
+  <div class="callout">
+    <code>.filter()</code> and <code>.map()</code> are everywhere in AI-generated TS — transforming
+    lists of files, messages, API results, UI items. Whenever you see
+    <code>something.filter(x => ...)</code> or <code>something.map(x => ...)</code>, mentally translate
+    it to a Python list comprehension and you've got the gist.
+  </div>
+
+  <div class="quiz">
+    <p class="q">Quiz: given the <code>tasks</code> array above, what does <code>tasks.filter(t => t.done)</code> return?</p>
+    <div class="options">
+      <button data-correct="false">A single <code>Task</code> — the first one marked done</button>
+      <button data-correct="true">A new array containing only the tasks where <code>done</code> is <code>true</code></button>
+      <button data-correct="false">The number of tasks that are done</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>4. Modules: <code>import</code> and <code>export</code> <span class="tag tag-js">JS</span></h2>
+  <p>
+    Real projects split code across files. <code>export</code> marks something as usable from other
+    files; <code>import</code> brings it in. This is the very first thing you'll see at the top of
+    almost any <code>.ts</code> file:
+  </p>
+  <div class="side-by-side">
+    <div>
+      <h4><span class="file-label">types.ts</span></h4>
+      <pre><code><span class="tok-kw">export interface</span> Task {
+  id<span class="tok-type">: number</span>;
+  title<span class="tok-type">: string</span>;
+  done<span class="tok-type">: boolean</span>;
+}</code></pre>
+    </div>
+    <div>
+      <h4><span class="file-label">tasks.ts</span></h4>
+      <pre><code><span class="tok-kw">import</span> { Task } <span class="tok-kw">from</span> <span class="tok-str">"./types"</span>;
+
+<span class="tok-kw">export const</span> getIncomplete = (tasks<span class="tok-type">: Task[]</span>)<span class="tok-type">: Task[]</span> =>
+  tasks.filter(task => !task.done);</code></pre>
+    </div>
+  </div>
+  <p>
+    This is the same idea as Python's <code>from types import Task</code> — <code>tasks.ts</code> is
+    saying "give me the <code>Task</code> shape that lives in <code>./types</code>, so I can use it
+    here." <code>export</code> on the interface and the function means "other files are allowed to
+    import these too." Anything <em>not</em> exported is private to that file — like a name without an
+    <code>__all__</code> entry, or a "module-private" helper.
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: in the <code>tasks.ts</code> file above, why does it write <code>import { Task } from "./types"</code>?</p>
+    <div class="options">
+      <button data-correct="false">It's installing a package called "types" from the internet</button>
+      <button data-correct="true">It's bringing in the <code>Task</code> interface that was exported from the local <code>types.ts</code> file</button>
+      <button data-correct="false">It's a comment describing the file's purpose</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>5. Putting it together</h2>
+  <p>
+    Here's a small file that uses everything from this lesson — this is realistically close to a
+    snippet an AI assistant might generate for a CLI to-do tool:
+  </p>
+  <pre><code><span class="file-label">tasks.ts</span>
+<span class="tok-kw">import</span> { Task } <span class="tok-kw">from</span> <span class="tok-str">"./types"</span>;
+
+<span class="tok-kw">export const</span> getIncomplete = (tasks<span class="tok-type">: Task[]</span>)<span class="tok-type">: Task[]</span> =>
+  tasks.filter(task => !task.done);
+
+<span class="tok-kw">export const</span> taskTitles = (tasks<span class="tok-type">: Task[]</span>)<span class="tok-type">: string[]</span> =>
+  tasks.map(task => task.title);</code></pre>
+  <p>
+    Reading it top to bottom: "bring in the <code>Task</code> shape from <code>types.ts</code>; export a
+    function <code>getIncomplete</code> that takes a list of tasks and returns the ones not done; export
+    another function <code>taskTitles</code> that takes a list of tasks and returns just their titles as
+    strings." Two arrow functions, both exported, both typed — a tiny but completely realistic module.
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: in the <code>tasks.ts</code> snippet above, which parts would <strong>disappear</strong> after compiling to plain JavaScript?</p>
+    <div class="options">
+      <button data-correct="false"><code>import</code>, <code>export const</code>, and <code>.filter()</code>/<code>.map()</code></button>
+      <button data-correct="true"><code>{ Task }</code> in the import, and every <code>: Task[]</code> / <code>: string[]</code> annotation</button>
+      <button data-correct="false">The whole file — TS files can't be compiled to JS</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>Try it yourself</h2>
+  <p>
+    Open the <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener">TypeScript
+    Playground</a>. The Playground runs a single file, so combine everything into one — paste the
+    <code>Task</code> interface, the <code>tasks</code> array, and the <code>getIncomplete</code> /
+    <code>taskTitles</code> functions (skip the <code>import</code>/<code>export</code> lines for now,
+    since there's only one file). Add at the bottom:
+  </p>
+  <pre><code>console.log(getIncomplete(tasks));
+console.log(taskTitles(tasks));</code></pre>
+  <p>
+    Then break it on purpose: change <code>task => !task.done</code> to
+    <code>task => !task.donee</code> (typo). TypeScript should immediately underline
+    <code>donee</code> — because it doesn't exist on the <code>Task</code> interface. That's the type
+    checker catching a typo that, in plain JavaScript, would silently return <code>undefined</code> and
+    cause a confusing bug later.
+  </p>
+
+  <div class="ask">
+    <strong>Stuck or curious?</strong> If you open a real <code>.ts</code> file from your TUI project
+    and something doesn't match a pattern from this lesson, paste a snippet here — that's the fastest
+    way to turn "AI output I can't read" into the next lesson.
+  </div>
+
+  <div class="nav">
+    <span>Previous: <a href="0002-typescript-through-a-python-lens.html">TypeScript Through a Python Lens</a></span>
+    <span>Reference: <a href="../reference/0003-reading-real-typescript-cheatsheet.html">Reading Real TypeScript Cheat Sheet</a></span>
+    <span>Next lesson: <code>async</code>/<code>await</code> &amp; <code>Promise&lt;T&gt;</code> — reading code that talks to APIs (coming soon)</span>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.quiz').forEach(function (quiz) {
+  var optionsEl = quiz.querySelector('.options');
+  var feedback = quiz.querySelector('.feedback');
+  optionsEl.querySelectorAll('button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var isCorrect = btn.getAttribute('data-correct') === 'true';
+      optionsEl.querySelectorAll('button').forEach(function (b) {
+        b.disabled = true;
+        if (b.getAttribute('data-correct') === 'true') b.classList.add('correct');
+      });
+      if (!isCorrect) btn.classList.add('incorrect');
+      feedback.textContent = isCorrect ? 'Correct!' : 'Not quite — the highlighted option is correct.';
+      feedback.className = 'feedback ' + (isCorrect ? 'good' : 'bad');
+    });
+  });
+});
+</script>
+</body>
+</html>
