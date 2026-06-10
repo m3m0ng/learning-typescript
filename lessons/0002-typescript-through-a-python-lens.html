@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lesson 2: TypeScript Through a Python Lens</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #181b25;
+    --text: #e6e6e6;
+    --muted: #9aa0ad;
+    --accent: #3b82f6;
+    --good: #22c55e;
+    --bad: #ef4444;
+    --code-bg: #11141d;
+    --border: #2a2e3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1 { font-size: 2rem; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); margin-top: 0; margin-bottom: 32px; }
+  h2 { margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  p { color: #d1d5db; }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9em;
+    color: #93c5fd;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; color: #e6e6e6; }
+  .tok-kw { color: #c084fc; }
+  .tok-type { color: #5eead4; }
+  .tok-str { color: #fca5a5; }
+  .tok-com { color: #6b7280; font-style: italic; }
+  .callout {
+    background: var(--panel);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 20px 0;
+    color: #d1d5db;
+  }
+  .side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .side-by-side > div {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .side-by-side h4 {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .side-by-side pre { margin: 0; border: none; padding: 0; background: none; }
+  @media (max-width: 600px) {
+    .side-by-side { grid-template-columns: 1fr; }
+  }
+  .quiz {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .quiz p.q { font-weight: 600; margin-top: 0; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .options button {
+    text-align: left;
+    background: var(--code-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .options button:hover { border-color: var(--accent); }
+  .options button.correct { border-color: var(--good); background: rgba(34,197,94,0.12); }
+  .options button.incorrect { border-color: var(--bad); background: rgba(239,68,68,0.12); }
+  .feedback { margin-top: 10px; font-size: 0.9rem; min-height: 1.2em; }
+  .feedback.good { color: var(--good); }
+  .feedback.bad { color: var(--bad); }
+  .nav {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .nav a { color: var(--accent); text-decoration: none; }
+  .badge {
+    display: inline-block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .ask {
+    margin-top: 48px;
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Lesson 2 of your TypeScript journey</span>
+  <h1>TypeScript Through a Python Lens</h1>
+  <p class="subtitle">Goal: re-anchor what you saw in Lesson 1 using Python (which you already know) and a robotics example, then add one new idea: lists of structured readings.</p>
+
+  <div class="callout">
+    Forget JavaScript for this lesson. Every TypeScript idea below maps onto something you've
+    already done in Python with type hints and dataclasses, or with sensor data on Arduino.
+  </div>
+
+  <h2>1. Variables: Python type hints vs. TypeScript annotations</h2>
+  <p>
+    In Python, you can optionally write a type hint after a variable name. TypeScript makes this
+    <strong>mandatory-feeling</strong> (and enforced) using a colon, the same way:
+  </p>
+  <div class="side-by-side">
+    <div>
+      <h4>Python (type hint)</h4>
+      <pre><code>battery_voltage<span class="tok-type">: float</span> = 12.6
+motor_count<span class="tok-type">: int</span> = 4
+robot_name<span class="tok-type">: str</span> = <span class="tok-str">"Rover-1"</span>
+is_armed<span class="tok-type">: bool</span> = <span class="tok-kw">True</span></code></pre>
+    </div>
+    <div>
+      <h4>TypeScript</h4>
+      <pre><code><span class="tok-kw">let</span> batteryVoltage<span class="tok-type">: number</span> = 12.6;
+<span class="tok-kw">let</span> motorCount<span class="tok-type">: number</span> = 4;
+<span class="tok-kw">let</span> robotName<span class="tok-type">: string</span> = <span class="tok-str">"Rover-1"</span>;
+<span class="tok-kw">let</span> isArmed<span class="tok-type">: boolean</span> = <span class="tok-kw">true</span>;</code></pre>
+    </div>
+  </div>
+  <p>
+    The only real differences: <code>let</code> instead of nothing (TypeScript needs a keyword to
+    declare a variable), every line ends with <code>;</code>, and Python's <code>int</code> and
+    <code>float</code> both become TypeScript's single <code>number</code> type. Otherwise — same idea,
+    same intent: "this name will only ever hold this kind of value."
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: in Python you'd write <code>temperature: float = 23.5</code>. What's the TypeScript equivalent?</p>
+    <div class="options">
+      <button data-correct="false"><code>let temperature: float = 23.5;</code></button>
+      <button data-correct="true"><code>let temperature: number = 23.5;</code></button>
+      <button data-correct="false"><code>let temperature = number(23.5);</code></button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>2. Functions: type hints on parameters and return values</h2>
+  <p>
+    You've done this in Python too — annotating what a function expects and what it gives back.
+    Here's a function that converts a sensor's raw reading (0-1023, like an Arduino analog pin) into
+    a voltage:
+  </p>
+  <div class="side-by-side">
+    <div>
+      <h4>Python</h4>
+      <pre><code><span class="tok-kw">def</span> raw_to_voltage(raw<span class="tok-type">: int</span>) -> <span class="tok-type">float</span>:
+    <span class="tok-kw">return</span> (raw / 1023) * 5.0</code></pre>
+    </div>
+    <div>
+      <h4>TypeScript</h4>
+      <pre><code><span class="tok-kw">function</span> rawToVoltage(raw<span class="tok-type">: number</span>)<span class="tok-type">: number</span> {
+  <span class="tok-kw">return</span> (raw / 1023) * 5.0;
+}</code></pre>
+    </div>
+  </div>
+  <p>
+    Same shape: <code>(parameter: type) -> return_type</code> in Python becomes
+    <code>(parameter: type): return_type</code> in TypeScript. If you tried to call
+    <code>rawToVoltage("high")</code>, TypeScript stops you immediately — just like a Python type
+    checker (e.g. <code>mypy</code>) would flag <code>raw_to_voltage("high")</code>.
+  </p>
+
+  <h2>3. Describing a "reading": Python dataclass vs. TypeScript interface</h2>
+  <p>
+    Imagine you're logging readings from a robot's sensor array — a timestamp, a sensor name, and a
+    value. In Python you might define a <code>dataclass</code> to describe that shape:
+  </p>
+  <div class="side-by-side">
+    <div>
+      <h4>Python</h4>
+      <pre><code><span class="tok-com">from dataclasses import dataclass</span>
+
+<span class="tok-kw">@dataclass</span>
+<span class="tok-kw">class</span> SensorReading:
+    timestamp<span class="tok-type">: int</span>
+    sensor<span class="tok-type">: str</span>
+    value<span class="tok-type">: float</span></code></pre>
+    </div>
+    <div>
+      <h4>TypeScript</h4>
+      <pre><code><span class="tok-kw">interface</span> SensorReading {
+  timestamp<span class="tok-type">: number</span>;
+  sensor<span class="tok-type">: string</span>;
+  value<span class="tok-type">: number</span>;
+}</code></pre>
+    </div>
+  </div>
+  <div class="callout">
+    A Python <code>dataclass</code> and a TypeScript <code>interface</code> do almost the same job:
+    they describe the <strong>shape of a record</strong> — what fields it has and what type each one
+    is. The dataclass actually creates an object you instantiate; the interface is purely a
+    "blueprint" the type checker uses — it doesn't exist at runtime at all. But for reading code,
+    treat them as the same idea: "here's what this kind of record looks like."
+  </div>
+
+  <div class="quiz">
+    <p class="q">Quiz: which best describes what a TypeScript <code>interface</code> is for?</p>
+    <div class="options">
+      <button data-correct="false">It's a function that runs when the program starts</button>
+      <button data-correct="true">It's a blueprint describing what fields a record/object must have, and their types</button>
+      <button data-correct="false">It's a loop that repeats code multiple times</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>4. New idea: a list of readings (array of objects)</h2>
+  <p>
+    On a real robot, you don't get one reading — you get a stream of them, like a Python
+    <code>list[SensorReading]</code>. TypeScript writes "a list of <code>X</code>" as
+    <code>X[]</code>:
+  </p>
+  <div class="side-by-side">
+    <div>
+      <h4>Python</h4>
+      <pre><code>readings<span class="tok-type">: list[SensorReading]</span> = [
+    SensorReading(timestamp=1001, sensor=<span class="tok-str">"temp"</span>, value=23.5),
+    SensorReading(timestamp=1002, sensor=<span class="tok-str">"temp"</span>, value=23.7),
+]</code></pre>
+    </div>
+    <div>
+      <h4>TypeScript</h4>
+      <pre><code><span class="tok-kw">const</span> readings<span class="tok-type">: SensorReading[]</span> = [
+  { timestamp: 1001, sensor: <span class="tok-str">"temp"</span>, value: 23.5 },
+  { timestamp: 1002, sensor: <span class="tok-str">"temp"</span>, value: 23.7 },
+];</code></pre>
+    </div>
+  </div>
+  <p>
+    <code>SensorReading[]</code> reads as "an array where <strong>every item</strong> must match the
+    <code>SensorReading</code> shape." If you tried to sneak in
+    <code>{ timestamp: "oops", sensor: "temp", value: 23.5 }</code> — a string where a number should
+    be — TypeScript would flag that one entry, the same way a type checker would flag a wrong type
+    inside a Python list.
+  </p>
+
+  <h2>5. Putting it together: a function over the list</h2>
+  <p>
+    Here's a function that takes the whole list of readings and returns just the average value —
+    something you'd genuinely do when processing logged sensor data:
+  </p>
+  <pre><code><span class="tok-kw">function</span> averageValue(readings<span class="tok-type">: SensorReading[]</span>)<span class="tok-type">: number</span> {
+  <span class="tok-kw">const</span> total = readings.reduce((sum, r) => sum + r.value, 0);
+  <span class="tok-kw">return</span> total / readings.length;
+}</code></pre>
+  <p>
+    Reading this with what you know: <code>readings: SensorReading[]</code> — "give me a list of
+    sensor readings." <code>: number</code> — "I'll give you back a single number (the average)."
+    The body is doing roughly what
+    <code>sum(r.value for r in readings) / len(readings)</code> would do in Python — don't worry
+    about <code>reduce</code> syntax yet, just recognize the <strong>types in and out</strong>.
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: given <code>function averageValue(readings: SensorReading[]): number</code>, which call is type-correct?</p>
+    <div class="options">
+      <button data-correct="true"><code>averageValue([{ timestamp: 1, sensor: "temp", value: 20 }])</code></button>
+      <button data-correct="false"><code>averageValue({ timestamp: 1, sensor: "temp", value: 20 })</code></button>
+      <button data-correct="false"><code>averageValue([{ timestamp: 1, sensor: "temp", value: "20" }])</code></button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>Try it yourself</h2>
+  <p>
+    In the <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener">TypeScript
+    Playground</a>, paste the <code>SensorReading</code> interface, the <code>readings</code> array,
+    and the <code>averageValue</code> function from above. Then add this line at the bottom and click
+    Run:
+  </p>
+  <pre><code>console.log(averageValue(readings));</code></pre>
+  <p>
+    Then try breaking it on purpose: change one <code>value: 23.5</code> to
+    <code>value: "23.5"</code> (a string). You won't even need to click Run — TypeScript will
+    underline the problem immediately. Hover over the underline to read the error message; it should
+    sound a lot like a Python type-checker complaint.
+  </p>
+
+  <div class="ask">
+    <strong>Stuck or curious?</strong> If any error message looks like gibberish, paste it here and
+    ask "what does this mean?" — translating cryptic type errors into plain English is exactly what
+    your AI teacher is for.
+  </div>
+
+  <div class="nav">
+    <span>Reference: <a href="../reference/0002-python-to-typescript-cheatsheet.html">Python &rarr; TypeScript Cheat Sheet</a></span>
+    <span>Next lesson: <code>any</code> vs <code>unknown</code>, and reading function types in AI output (coming soon)</span>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.quiz').forEach(function (quiz) {
+  var optionsEl = quiz.querySelector('.options');
+  var feedback = quiz.querySelector('.feedback');
+  optionsEl.querySelectorAll('button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var isCorrect = btn.getAttribute('data-correct') === 'true';
+      optionsEl.querySelectorAll('button').forEach(function (b) {
+        b.disabled = true;
+        if (b.getAttribute('data-correct') === 'true') b.classList.add('correct');
+      });
+      if (!isCorrect) btn.classList.add('incorrect');
+      feedback.textContent = isCorrect ? 'Correct!' : 'Not quite — the highlighted option is correct.';
+      feedback.className = 'feedback ' + (isCorrect ? 'good' : 'bad');
+    });
+  });
+});
+</script>
+</body>
+</html>

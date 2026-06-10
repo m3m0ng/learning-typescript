@@ -10,7 +10,8 @@ The user wants to become proficient in TypeScript. The immediate, practical driv
 - Can spot when AI-generated TypeScript is wrong or overly complex, and simplify it
 
 ## Constraints
-- Starting from beginner level in both JavaScript and TypeScript — fundamentals need to be covered, not assumed
+- Mechanical engineer by background, not a programmer. Knows Python and a bit of Arduino from personal robotics projects. No JavaScript knowledge.
+- Lessons should anchor to Python and real-world engineering/robotics analogies, not JavaScript comparisons
 - Learning happens in this repo (`learning-typescript`) via the `teach` skill workspace
 
 ## Out of scope
