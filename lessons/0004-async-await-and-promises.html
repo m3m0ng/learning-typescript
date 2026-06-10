@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lesson 4: async / await and Promise&lt;T&gt;</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #181b25;
+    --text: #e6e6e6;
+    --muted: #9aa0ad;
+    --accent: #3b82f6;
+    --good: #22c55e;
+    --bad: #ef4444;
+    --code-bg: #11141d;
+    --border: #2a2e3a;
+    --js-color: #facc15;
+    --ts-color: #5eead4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 24px 96px; }
+  h1 { font-size: 2rem; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); margin-top: 0; margin-bottom: 32px; }
+  h2 { margin-top: 48px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+  p { color: #d1d5db; }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9em;
+    color: #93c5fd;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; color: #e6e6e6; }
+  .tok-kw { color: #c084fc; }
+  .tok-type { color: #5eead4; }
+  .tok-str { color: #fca5a5; }
+  .tok-com { color: #6b7280; font-style: italic; }
+  .callout {
+    background: var(--panel);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 20px 0;
+    color: #d1d5db;
+  }
+  .side-by-side {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  .side-by-side > div {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+  }
+  .side-by-side h4 {
+    margin: 0 0 8px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--muted);
+  }
+  .side-by-side pre { margin: 0; border: none; padding: 0; background: none; }
+  @media (max-width: 600px) {
+    .side-by-side { grid-template-columns: 1fr; }
+  }
+  .file-label {
+    display: inline-block;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: -4px;
+  }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    padding: 1px 6px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .tag-js { background: rgba(250, 204, 21, 0.15); color: var(--js-color); border: 1px solid rgba(250, 204, 21, 0.4); }
+  .tag-ts { background: rgba(94, 234, 212, 0.15); color: var(--ts-color); border: 1px solid rgba(94, 234, 212, 0.4); }
+  .quiz {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .quiz p.q { font-weight: 600; margin-top: 0; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .options button {
+    text-align: left;
+    background: var(--code-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .options button:hover { border-color: var(--accent); }
+  .options button.correct { border-color: var(--good); background: rgba(34,197,94,0.12); }
+  .options button.incorrect { border-color: var(--bad); background: rgba(239,68,68,0.12); }
+  .feedback { margin-top: 10px; font-size: 0.9rem; min-height: 1.2em; }
+  .feedback.good { color: var(--good); }
+  .feedback.bad { color: var(--bad); }
+  .nav {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .nav a { color: var(--accent); text-decoration: none; }
+  .badge {
+    display: inline-block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .ask {
+    margin-top: 48px;
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Lesson 4 of your TypeScript journey</span>
+  <h1>async / await and Promise&lt;T&gt;</h1>
+  <p class="subtitle">Goal: read the code that talks to the outside world — files, APIs, processes — without it looking like magic. This is the single most common pattern in real AI-generated TypeScript, and it's where you'll meet your first generic.</p>
+
+  <div class="callout">
+    <strong>Why this lesson, now:</strong> almost anything useful a CLI tool or TUI does — fetch from an
+    API, read a file, run a subprocess — takes <em>time</em>, and JavaScript handles "takes time" with
+    <code>async</code>/<code>await</code>. If you've ever seen AI-generated TS sprinkled with
+    <code>async</code>, <code>await</code>, and <code>Promise&lt;...&gt;</code> and skimmed past it,
+    this lesson makes those three words click.
+  </div>
+
+  <h2>1. The core idea: a value that isn't ready <em>yet</em></h2>
+  <p>
+    Some results are available instantly: <code>2 + 2</code> is <code>4</code> right now. But "the
+    contents of a file" or "the response from an API" can't be handed to you the instant you ask —
+    there's a delay while the disk or network does its work.
+  </p>
+  <p>
+    JavaScript's answer is a <strong>Promise</strong>: an object you get back <em>immediately</em> that
+    represents "a value that will arrive later." Think of it as a <strong>claim ticket at a coat
+    check</strong> — you hand over your coat and get a ticket on the spot. The ticket isn't the coat,
+    but it's your guarantee you can collect the coat once it's ready.
+  </p>
+  <div class="callout">
+    Python analogy: this is exactly <code>async def</code> and <code>await</code> in <code>asyncio</code>.
+    A Python <code>async def</code> function returns a <em>coroutine</em> you <code>await</code>;
+    a JS <code>async</code> function returns a <em>Promise</em> you <code>await</code>. Same shape, same
+    instinct — the keywords are nearly identical.
+  </div>
+
+  <h2>2. <code>Promise&lt;T&gt;</code> — your first generic <span class="tag tag-ts">TS</span></h2>
+  <p>
+    Here's where TypeScript adds value. A promise will eventually produce a value — but a value of
+    <em>what type</em>? That's what the <code>&lt;T&gt;</code> says:
+  </p>
+  <pre><code><span class="tok-type">Promise&lt;string&gt;</span>   <span class="tok-com">// "a value arriving later, and it will be a string"</span>
+<span class="tok-type">Promise&lt;number&gt;</span>   <span class="tok-com">// "...will be a number"</span>
+<span class="tok-type">Promise&lt;Task[]&gt;</span>   <span class="tok-com">// "...will be an array of Task"</span>
+<span class="tok-type">Promise&lt;void&gt;</span>     <span class="tok-com">// "...finishes, but produces no useful value"</span></code></pre>
+  <p>
+    The angle brackets <code>&lt;...&gt;</code> are a <strong>generic</strong>: a slot you fill in.
+    <code>Promise</code> is the container; the <code>T</code> inside is "what's in the box once it
+    arrives." You already met this shape without noticing — <code>Array&lt;string&gt;</code> is the
+    same idea (it's just usually written <code>string[]</code>).
+  </p>
+  <div class="callout">
+    Read <code>Promise&lt;T&gt;</code> out loud as <strong>"a promise of a <code>T</code>."</strong>
+    <code>Promise&lt;string&gt;</code> = "a promise of a string." That phrasing will carry you through
+    nearly every generic you'll ever read.
+  </div>
+
+  <div class="quiz">
+    <p class="q">Quiz: a function is typed to return <code>Promise&lt;Task[]&gt;</code>. What does that tell you?</p>
+    <div class="options">
+      <button data-correct="false">It returns an array of tasks immediately</button>
+      <button data-correct="true">It returns right away with a promise; later, that promise produces an array of <code>Task</code></button>
+      <button data-correct="false">It returns a single <code>Task</code> after a delay</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>3. <code>async</code> and <code>await</code> <span class="tag tag-js">JS</span></h2>
+  <p>
+    Working with promises directly is clunky. <code>async</code> and <code>await</code> are the syntax
+    that makes "code that waits" read like ordinary top-to-bottom code:
+  </p>
+  <ul>
+    <li><code>async</code> in front of a function means "this function does some waiting, and it returns a <strong>Promise</strong>."</li>
+    <li><code>await</code> in front of a promise means "pause here until the value arrives, then give me the unwrapped value."</li>
+  </ul>
+  <pre><code><span class="tok-kw">async function</span> loadTitle()<span class="tok-type">: Promise&lt;string&gt;</span> {
+  <span class="tok-kw">const</span> response = <span class="tok-kw">await</span> fetch(<span class="tok-str">"https://api.example.com/title"</span>);
+  <span class="tok-kw">const</span> text<span class="tok-type">: string</span> = <span class="tok-kw">await</span> response.text();
+  <span class="tok-kw">return</span> text;
+}</code></pre>
+  <p>
+    Notice the two halves of the same coin: the function is declared
+    <code>: Promise&lt;string&gt;</code> (from the <em>outside</em>, callers get a promise), but
+    <code>return text;</code> returns a plain <code>string</code>. <strong>An <code>async</code>
+    function automatically wraps its return value in a promise</strong> — you write <code>return
+    text</code>, callers receive a <code>Promise&lt;string&gt;</code>.
+  </p>
+  <p>
+    And <code>await response.text()</code> does the reverse: <code>response.text()</code> hands back a
+    <code>Promise&lt;string&gt;</code>, and <code>await</code> <strong>unwraps</strong> it into the
+    actual <code>string</code> you store in <code>text</code>.
+  </p>
+
+  <div class="side-by-side">
+    <div>
+      <h4>Python (asyncio)</h4>
+      <pre><code><span class="tok-kw">async def</span> load_title() -> str:
+    resp = <span class="tok-kw">await</span> fetch(url)
+    text = <span class="tok-kw">await</span> resp.text()
+    <span class="tok-kw">return</span> text</code></pre>
+    </div>
+    <div>
+      <h4>TypeScript</h4>
+      <pre><code><span class="tok-kw">async function</span> loadTitle()<span class="tok-type">: Promise&lt;string&gt;</span> {
+  <span class="tok-kw">const</span> resp = <span class="tok-kw">await</span> fetch(url);
+  <span class="tok-kw">const</span> text = <span class="tok-kw">await</span> resp.text();
+  <span class="tok-kw">return</span> text;
+}</code></pre>
+    </div>
+  </div>
+  <p>
+    The one wrinkle worth knowing: Python writes the return type as <code>-> str</code>, but TS writes
+    it as <code>Promise&lt;string&gt;</code> — the promise wrapper is <em>explicit</em> in the type.
+    That's the small mental adjustment: <strong>an <code>async</code> function's return type is always
+    <code>Promise&lt;something&gt;</code>, never just <code>something</code>.</strong>
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: inside an <code>async</code> function, you write <code>const data = await getTasks();</code> where <code>getTasks(): Promise&lt;Task[]&gt;</code>. What's the type of <code>data</code>?</p>
+    <div class="options">
+      <button data-correct="false"><code>Promise&lt;Task[]&gt;</code> — the await doesn't change anything</button>
+      <button data-correct="true"><code>Task[]</code> — <code>await</code> unwrapped the promise</button>
+      <button data-correct="false"><code>Task</code> — a single task</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>4. Arrow-function form <span class="tag tag-js">JS</span></h2>
+  <p>
+    Combine this with Lesson 3 and you get the form you'll see most often in real code — an
+    <code>async</code> arrow function assigned to a <code>const</code>, often exported from a module:
+  </p>
+  <pre><code><span class="tok-kw">import</span> { Task } <span class="tok-kw">from</span> <span class="tok-str">"./types"</span>;
+
+<span class="tok-kw">export const</span> fetchTasks = <span class="tok-kw">async</span> ()<span class="tok-type">: Promise&lt;Task[]&gt;</span> => {
+  <span class="tok-kw">const</span> response = <span class="tok-kw">await</span> fetch(<span class="tok-str">"https://api.example.com/tasks"</span>);
+  <span class="tok-kw">const</span> tasks<span class="tok-type">: Task[]</span> = <span class="tok-kw">await</span> response.json();
+  <span class="tok-kw">return</span> tasks.filter(task => !task.done);
+};</code></pre>
+  <p>
+    Read top to bottom: "export an async function <code>fetchTasks</code> that takes no arguments and
+    promises to deliver a <code>Task[]</code>; inside, wait for the network response, wait for it to be
+    parsed as JSON into <code>Task[]</code>, then return only the unfinished tasks." Every concept from
+    Lessons 1&ndash;3 is here — interface, array type, arrow function, <code>.filter()</code>, module
+    <code>import</code>/<code>export</code> — plus the new <code>async</code>/<code>await</code>/<code>Promise</code>.
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: which parts of the <code>fetchTasks</code> snippet above would <strong>vanish</strong> when compiled to plain JavaScript?</p>
+    <div class="options">
+      <button data-correct="false"><code>async</code> and <code>await</code></button>
+      <button data-correct="true">The <code>: Promise&lt;Task[]&gt;</code> and <code>: Task[]</code> annotations and <code>{ Task }</code> in the import</button>
+      <button data-correct="false"><code>fetch()</code> and <code>.filter()</code></button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>5. The trap: forgetting to <code>await</code></h2>
+  <p>
+    The most common bug — and the thing you'll most often need to spot in AI-generated code — is
+    <strong>forgetting <code>await</code></strong>. If you drop it, you're holding the claim ticket
+    instead of the coat:
+  </p>
+  <pre><code><span class="tok-com">// BUG: no await</span>
+<span class="tok-kw">const</span> tasks = fetchTasks();
+console.log(tasks.length);  <span class="tok-com">// undefined — tasks is a Promise, not an array!</span>
+
+<span class="tok-com">// Correct</span>
+<span class="tok-kw">const</span> tasks = <span class="tok-kw">await</span> fetchTasks();
+console.log(tasks.length);  <span class="tok-com">// works — tasks is the real array</span></code></pre>
+  <div class="callout">
+    Good news: this is exactly where TypeScript earns its keep. Without the <code>await</code>,
+    <code>tasks</code> has type <code>Promise&lt;Task[]&gt;</code>, and <code>.length</code> /
+    <code>.filter()</code> aren't valid on a promise — so the type checker complains
+    <em>before you run it</em>. When you see a red squiggle on <code>.something</code> after a function
+    call, "did I forget <code>await</code>?" is the first thing to check.
+  </div>
+
+  <h2>Try it yourself</h2>
+  <p>
+    Open the <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener">TypeScript
+    Playground</a> and paste this (no network needed — <code>delay</code> just simulates work that takes
+    time):
+  </p>
+  <pre><code>const delay = (ms: number): Promise&lt;void&gt; =>
+  new Promise(resolve => setTimeout(resolve, ms));
+
+const getGreeting = async (name: string): Promise&lt;string&gt; => {
+  await delay(500);          // pretend this is a slow API/file read
+  return `Hello, ${name}!`;
+};
+
+const main = async () => {
+  console.log("asking...");
+  const message = await getGreeting("Hao");
+  console.log(message);
+};
+
+main();</code></pre>
+  <p>
+    Run it — you'll see <code>asking...</code> then, half a second later, <code>Hello, Hao!</code>.
+    Now <strong>break it on purpose</strong>: delete the <code>await</code> in front of
+    <code>getGreeting("Hao")</code>. TypeScript will flag that <code>message</code> is now a
+    <code>Promise&lt;string&gt;</code>, and if you <code>console.log(message)</code> you'll see a promise
+    object instead of the greeting — the "holding the ticket, not the coat" bug, caught live.
+  </p>
+
+  <div class="ask">
+    <strong>Stuck or curious?</strong> Got a real <code>async</code> snippet from your TUI/CLI project
+    that you can't fully parse? Paste it here and we'll read it together — that's the fastest way to
+    turn "AI output I can't read" into the next lesson. A good next step from here is <strong>generics
+    beyond <code>Promise&lt;T&gt;</code></strong> — <code>Array&lt;T&gt;</code>, <code>Map&lt;K, V&gt;</code>,
+    and writing your own.
+  </div>
+
+  <div class="nav">
+    <span>Previous: <a href="0003-arrow-functions-and-modules.html">Arrow Functions, Modules, and Reading Real Files</a></span>
+    <span>Reference: <a href="../cheatsheet.md">Cheatsheet</a></span>
+    <span>Next lesson: generics in depth — <code>&lt;T&gt;</code> as a reusable placeholder (coming soon)</span>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.quiz').forEach(function (quiz) {
+  var optionsEl = quiz.querySelector('.options');
+  var feedback = quiz.querySelector('.feedback');
+  optionsEl.querySelectorAll('button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var isCorrect = btn.getAttribute('data-correct') === 'true';
+      optionsEl.querySelectorAll('button').forEach(function (b) {
+        b.disabled = true;
+        if (b.getAttribute('data-correct') === 'true') b.classList.add('correct');
+      });
+      if (!isCorrect) btn.classList.add('incorrect');
+      feedback.textContent = isCorrect ? 'Correct!' : 'Not quite — the highlighted option is correct.';
+      feedback.className = 'feedback ' + (isCorrect ? 'good' : 'bad');
+    });
+  });
+});
+</script>
+</body>
+</html>

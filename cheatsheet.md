@@ -194,3 +194,62 @@ If you delete every **TS** piece from a `.ts` file, what's left is the JavaScrip
 The TS Playground transpiles and runs the JS even when there are type errors — it just shows the error alongside the output. A typo'd property (e.g. `task.donee` instead of `task.done`) becomes `undefined` at runtime, so `!task.donee` is always `true` and silently breaks logic like `.filter()`.
 
 In a real project, `tsc` (or your editor's type checker) would flag this **before** the code ever runs — that's the whole point of compiling first.
+
+---
+
+## Lesson 4 — async / await and Promise\<T>
+
+### The mental model
+
+A **Promise** is "a value that will arrive later" — like a coat-check claim ticket. The ticket isn't the coat, but you can collect the coat once it's ready. Anything that takes time (network, file, subprocess) hands you a promise immediately instead of blocking.
+
+### `Promise<T>` — read it as "a promise of a T"
+
+| Type | Means |
+| --- | --- |
+| `Promise<string>` | A value arriving later that will be a `string` |
+| `Promise<number>` | ...will be a `number` |
+| `Promise<Task[]>` | ...will be an array of `Task` |
+| `Promise<void>` | Finishes, but produces no useful value |
+
+The `<...>` is a **generic** — a fill-in-the-blank slot. `Promise` is the container; `T` is "what's in the box once it arrives." Same shape as `Array<string>` (usually written `string[]`).
+
+### `async` and `await`
+
+| Keyword | Tag | Means |
+| --- | --- | --- |
+| `async` | **JS** | "This function does some waiting; it returns a `Promise`." Its return value is auto-wrapped in a promise. |
+| `await` | **JS** | "Pause until the value arrives, then give me the **unwrapped** value." |
+
+- An `async` function's return type is **always** `Promise<something>`, never just `something`.
+- `return text` (a `string`) inside an `async` function → callers receive `Promise<string>`.
+- `await somePromise` → unwraps `Promise<T>` into the actual `T`.
+
+```ts
+export const fetchTasks = async (): Promise<Task[]> => {
+  const response = await fetch("https://api.example.com/tasks");
+  const tasks: Task[] = await response.json();
+  return tasks.filter(task => !task.done);
+};
+```
+
+### Python (asyncio) ↔ TypeScript
+
+| Python | TypeScript |
+| --- | --- |
+| `async def load() -> str:` | `async function load(): Promise<string> {` |
+| `resp = await fetch(url)` | `const resp = await fetch(url);` |
+| `return text` | `return text;` |
+
+Key difference: Python writes the return type as `-> str`; TS makes the wrapper explicit as `Promise<string>`.
+
+### Gotcha: forgetting `await`
+
+```ts
+const tasks = fetchTasks();        // BUG: tasks is a Promise<Task[]>, not Task[]
+console.log(tasks.length);         // undefined
+
+const tasks = await fetchTasks();  // correct: tasks is the real array
+```
+
+If you call `.length` / `.filter()` on something and get a type error, ask first: **"did I forget `await`?"** The checker catches this before runtime because the value is still a `Promise`, not the unwrapped type.
