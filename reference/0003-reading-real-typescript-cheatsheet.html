@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cheat Sheet: Reading Real TypeScript Files</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --muted: #6b7280;
+    --accent: #2563eb;
+    --code-bg: #f3f4f6;
+    --border: #e5e7eb;
+    --js-color: #b45309;
+    --ts-color: #0f766e;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 1.8rem; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); margin-top: 0; margin-bottom: 28px; }
+  h2 {
+    font-size: 1.1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 6px;
+    margin-top: 32px;
+  }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 0.8rem; text-transform: uppercase; color: var(--muted); letter-spacing: 0.04em; }
+  code {
+    background: var(--code-bg);
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.88em;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px;
+    overflow-x: auto;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; }
+  .note { color: var(--muted); font-size: 0.88rem; margin-top: 6px; }
+  .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+  .tag-js { background: rgba(180, 83, 9, 0.12); color: var(--js-color); border: 1px solid rgba(180, 83, 9, 0.35); }
+  .tag-ts { background: rgba(15, 118, 110, 0.12); color: var(--ts-color); border: 1px solid rgba(15, 118, 110, 0.35); }
+  @media print {
+    body { color: #000; }
+    h2 { color: #000; }
+  }
+  .links { margin-top: 36px; font-size: 0.9rem; color: var(--muted); }
+  .links a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Reading Real TypeScript Files Cheat Sheet</h1>
+  <p class="subtitle">Compressed reference from Lesson 3. Use this when opening a real <code>.ts</code> file and something doesn't parse.</p>
+
+  <h2>JS vs TS at a glance</h2>
+  <table>
+    <tr><th>Tag</th><th>Meaning</th><th>Examples</th></tr>
+    <tr>
+      <td><span class="tag tag-js">JS</span></td>
+      <td>Real syntax — runs at runtime, survives compilation</td>
+      <td><code>const</code>/<code>let</code>, <code>=&gt;</code>, <code>import</code>/<code>export</code>, <code>.map()</code>/<code>.filter()</code>/<code>.reduce()</code>, <code>if</code>/loops, <code>async</code>/<code>await</code></td>
+    </tr>
+    <tr>
+      <td><span class="tag tag-ts">TS</span></td>
+      <td>Type-only — checked at compile time, then erased</td>
+      <td><code>: number</code> / <code>: string</code> / etc., <code>interface</code>, <code>type</code> aliases, generic <code>&lt;T&gt;</code> parameters</td>
+    </tr>
+  </table>
+  <p class="note">If you delete every <span class="tag tag-ts">TS</span> piece from a <code>.ts</code> file, what's left is the JavaScript that actually runs.</p>
+
+  <h2>Arrow functions</h2>
+  <table>
+    <tr><th>Form</th><th>Example</th><th>Notes</th></tr>
+    <tr>
+      <td>Block body</td>
+      <td><pre><code>const f = (n: number): number => {
+  return n * 2;
+};</code></pre></td>
+      <td>Same as <code>function f(n: number): number { return n * 2; }</code></td>
+    </tr>
+    <tr>
+      <td>Expression body</td>
+      <td><pre><code>const f = (n: number): number => n * 2;</code></pre></td>
+      <td>No braces, no <code>return</code> — the expression's value is returned</td>
+    </tr>
+    <tr>
+      <td>As a callback</td>
+      <td><pre><code>tasks.filter(task => !task.done)</code></pre></td>
+      <td>Most common form — types are usually inferred, not written</td>
+    </tr>
+  </table>
+
+  <h2>Array methods you'll see constantly</h2>
+  <table>
+    <tr><th>Method</th><th>Does</th><th>Python equivalent</th></tr>
+    <tr><td><code>arr.map(x => ...)</code></td><td>Transform every item, return a new array</td><td><code>[... for x in arr]</code></td></tr>
+    <tr><td><code>arr.filter(x => ...)</code></td><td>Keep items where the condition is true</td><td><code>[x for x in arr if ...]</code></td></tr>
+    <tr><td><code>arr.reduce((acc, x) => ..., start)</code></td><td>Combine all items into one value</td><td><code>functools.reduce(...)</code> / a running-total loop</td></tr>
+    <tr><td><code>arr.find(x => ...)</code></td><td>First item matching the condition (or <code>undefined</code>)</td><td><code>next((x for x in arr if ...), None)</code></td></tr>
+  </table>
+
+  <h2>Modules</h2>
+  <table>
+    <tr><th>Syntax</th><th>Meaning</th><th>Python equivalent</th></tr>
+    <tr><td><code>export interface Foo { ... }</code></td><td>Make <code>Foo</code> usable from other files</td><td>Defining <code>Foo</code> in a module others can import</td></tr>
+    <tr><td><code>export const f = (...) => ...</code></td><td>Make function <code>f</code> usable from other files</td><td>A top-level function others can import</td></tr>
+    <tr><td><code>import { Foo } from "./types"</code></td><td>Bring in <code>Foo</code> from local file <code>types.ts</code></td><td><code>from .types import Foo</code></td></tr>
+    <tr><td>Not exported</td><td>Private to that file</td><td>A name not in <code>__all__</code> / module-private convention</td></tr>
+  </table>
+
+  <h2>Quick mental checklist when opening a real <code>.ts</code> file</h2>
+  <table>
+    <tr><th>You see...</th><th>Read it as...</th></tr>
+    <tr><td>Top-of-file <code>import</code> lines</td><td>"This file depends on these other files/packages"</td></tr>
+    <tr><td><code>export</code> in front of something</td><td>"Other files can use this"</td></tr>
+    <tr><td><code>const x = (...) => ...</code></td><td>A function named <code>x</code> (arrow function)</td></tr>
+    <tr><td><code>arr.map(...)</code> / <code>.filter(...)</code></td><td>A list comprehension over <code>arr</code></td></tr>
+    <tr><td><code>: SomeType</code> anywhere</td><td>A guardrail — would vanish if compiled to JS</td></tr>
+  </table>
+
+  <div class="links">
+    Lesson: <a href="../lessons/0003-arrow-functions-and-modules.html">Arrow Functions, Modules, and Reading Real Files</a><br/>
+    Previous reference: <a href="0002-python-to-typescript-cheatsheet.html">Python &rarr; TypeScript Cheat Sheet</a><br/>
+    External: <a href="https://www.typescriptlang.org/docs/handbook/intro.html">TypeScript Handbook</a> ·
+    <a href="https://www.typescriptlang.org/play">TypeScript Playground</a>
+  </div>
+</div>
+</body>
+</html>
