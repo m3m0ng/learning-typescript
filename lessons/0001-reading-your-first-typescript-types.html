@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lesson 1: Reading Your First TypeScript Types</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #181b25;
+    --text: #e6e6e6;
+    --muted: #9aa0ad;
+    --accent: #3b82f6;
+    --good: #22c55e;
+    --bad: #ef4444;
+    --code-bg: #11141d;
+    --border: #2a2e3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+  .wrap {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 48px 24px 96px;
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 4px;
+  }
+  .subtitle {
+    color: var(--muted);
+    margin-top: 0;
+    margin-bottom: 32px;
+  }
+  h2 {
+    margin-top: 48px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  p { color: #d1d5db; }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9em;
+    color: #93c5fd;
+  }
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+  pre code { background: none; padding: 0; color: #e6e6e6; }
+  .tok-kw { color: #c084fc; }
+  .tok-type { color: #5eead4; }
+  .tok-str { color: #fca5a5; }
+  .tok-com { color: #6b7280; font-style: italic; }
+  .callout {
+    background: var(--panel);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 20px 0;
+    color: #d1d5db;
+  }
+  .quiz {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 16px 0;
+  }
+  .quiz p.q { font-weight: 600; margin-top: 0; }
+  .options { display: flex; flex-direction: column; gap: 8px; }
+  .options button {
+    text-align: left;
+    background: var(--code-bg);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-family: "SF Mono", Consolas, Menlo, monospace;
+    font-size: 0.9rem;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .options button:hover { border-color: var(--accent); }
+  .options button.correct { border-color: var(--good); background: rgba(34,197,94,0.12); }
+  .options button.incorrect { border-color: var(--bad); background: rgba(239,68,68,0.12); }
+  .feedback { margin-top: 10px; font-size: 0.9rem; min-height: 1.2em; }
+  .feedback.good { color: var(--good); }
+  .feedback.bad { color: var(--bad); }
+  .nav {
+    margin-top: 56px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .nav a { color: var(--accent); text-decoration: none; }
+  .badge {
+    display: inline-block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .ask {
+    margin-top: 48px;
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <span class="badge">Lesson 1 of your TypeScript journey</span>
+  <h1>Reading Your First TypeScript Types</h1>
+  <p class="subtitle">Goal: when AI generates a TypeScript function, you can read it and explain what every part means.</p>
+
+  <h2>1. JavaScript first: a function with no types</h2>
+  <p>
+    TypeScript is JavaScript <strong>plus a type system</strong>. Before adding types, here's a plain
+    JavaScript function. It takes a name and an age, and returns a greeting string.
+  </p>
+  <pre><code><span class="tok-kw">function</span> greet(name, age) {
+  <span class="tok-kw">return</span> <span class="tok-str">`Hello ${name}, you are ${age} years old.`</span>;
+}
+
+greet(<span class="tok-str">"Ava"</span>, 30); <span class="tok-com">// "Hello Ava, you are 30 years old."</span>
+greet(<span class="tok-str">"Ava"</span>, <span class="tok-str">"thirty"</span>); <span class="tok-com">// also "works" — JS won't stop you</span></code></pre>
+  <p>
+    Nothing stops you from calling <code>greet("Ava", "thirty")</code> with a string instead of a
+    number. JavaScript just runs it — and you might get a bug far away from where the mistake happened.
+  </p>
+
+  <h2>2. Adding types: the basic syntax</h2>
+  <p>
+    TypeScript lets you write <code>name: Type</code> after a variable, parameter, or return value.
+    Here's the same function with types added:
+  </p>
+  <pre><code><span class="tok-kw">function</span> greet(name<span class="tok-type">: string</span>, age<span class="tok-type">: number</span>)<span class="tok-type">: string</span> {
+  <span class="tok-kw">return</span> <span class="tok-str">`Hello ${name}, you are ${age} years old.`</span>;
+}</code></pre>
+  <div class="callout">
+    Read it left to right: <code>name: string</code> means "the parameter <code>name</code> must be a
+    string". The <code>: string</code> after the closing <code>)</code> means "this function must
+    <strong>return</strong> a string".
+  </div>
+  <p>
+    Now <code>greet("Ava", "thirty")</code> is a <strong>type error</strong> — TypeScript catches it
+    before the code even runs, right in your editor.
+  </p>
+
+  <h2>3. The everyday primitive types</h2>
+  <p>These five cover the vast majority of what you'll see in AI-generated code:</p>
+  <pre><code><span class="tok-kw">let</span> isActive<span class="tok-type">: boolean</span> = <span class="tok-kw">true</span>;
+<span class="tok-kw">let</span> count<span class="tok-type">: number</span> = 42;
+<span class="tok-kw">let</span> title<span class="tok-type">: string</span> = <span class="tok-str">"Learning TypeScript"</span>;
+<span class="tok-kw">let</span> tags<span class="tok-type">: string[]</span> = [<span class="tok-str">"ts"</span>, <span class="tok-str">"types"</span>]; <span class="tok-com">// array of strings</span>
+<span class="tok-kw">let</span> nothingYet<span class="tok-type">: undefined</span> = <span class="tok-kw">undefined</span>;</code></pre>
+  <p>
+    <code>let</code> and <code>const</code> are JavaScript keywords for declaring variables
+    (<code>const</code> can't be reassigned, <code>let</code> can). The <code>: type</code> part is
+    the only thing TypeScript adds.
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: what does <code>let scores: number[] = [];</code> mean?</p>
+    <div class="options" data-answer="2">
+      <button data-correct="false">A single number called <code>scores</code></button>
+      <button data-correct="false">A string that contains numbers</button>
+      <button data-correct="true">An array that can only contain numbers</button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>4. Describing objects with <code>interface</code></h2>
+  <p>
+    AI tools constantly generate <code>interface</code> blocks to describe the "shape" of an object —
+    what properties it has and what type each one is.
+  </p>
+  <pre><code><span class="tok-kw">interface</span> User {
+  id<span class="tok-type">: number</span>;
+  name<span class="tok-type">: string</span>;
+  email<span class="tok-type">: string</span>;
+  isAdmin<span class="tok-type">: boolean</span>;
+}
+
+<span class="tok-kw">function</span> printUser(user<span class="tok-type">: User</span>)<span class="tok-type">: void</span> {
+  console.log(<span class="tok-str">`${user.name} (${user.email})`</span>);
+}</code></pre>
+  <div class="callout">
+    Read <code>interface User { ... }</code> as: "Anything labeled <code>User</code> must have these
+    exact properties, with these exact types." <code>: void</code> means "this function doesn't return
+    anything useful."
+  </div>
+
+  <div class="quiz">
+    <p class="q">Quiz: given the <code>User</code> interface above, which call is valid?</p>
+    <div class="options" data-answer="1">
+      <button data-correct="false"><code>printUser({ id: 1, name: "Ava", email: "a@x.com" })</code></button>
+      <button data-correct="true"><code>printUser({ id: 1, name: "Ava", email: "a@x.com", isAdmin: false })</code></button>
+      <button data-correct="false"><code>printUser({ id: "1", name: "Ava", email: "a@x.com", isAdmin: false })</code></button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>5. Union types: "this OR that"</h2>
+  <p>
+    A union type, written with <code>|</code>, means a value can be one of several types. AI output
+    uses this constantly for things like status fields or optional results.
+  </p>
+  <pre><code><span class="tok-kw">type</span> Status = <span class="tok-str">"loading"</span> | <span class="tok-str">"success"</span> | <span class="tok-str">"error"</span>;
+
+<span class="tok-kw">function</span> describe(value<span class="tok-type">: string</span> | <span class="tok-type">number</span>)<span class="tok-type">: string</span> {
+  <span class="tok-kw">return</span> <span class="tok-str">`The value is ${value}`</span>;
+}</code></pre>
+  <p>
+    <code>type Status = "loading" | "success" | "error"</code> creates a custom type alias —
+    <code>Status</code> can ONLY be one of those three exact strings. <code>string | number</code>
+    means "a string, or a number — either is fine."
+  </p>
+
+  <div class="quiz">
+    <p class="q">Quiz: with <code>type Status = "loading" | "success" | "error"</code>, which assignment is valid?</p>
+    <div class="options" data-answer="0">
+      <button data-correct="true"><code>let s: Status = "success";</code></button>
+      <button data-correct="false"><code>let s: Status = "done";</code></button>
+      <button data-correct="false"><code>let s: Status = 1;</code></button>
+    </div>
+    <div class="feedback"></div>
+  </div>
+
+  <h2>6. Optional properties: the <code>?</code></h2>
+  <p>
+    A <code>?</code> after a property name means "this might not be there." Extremely common in
+    AI-generated interfaces for optional fields.
+  </p>
+  <pre><code><span class="tok-kw">interface</span> User {
+  id<span class="tok-type">: number</span>;
+  name<span class="tok-type">: string</span>;
+  nickname<span class="tok-type">?: string</span>; <span class="tok-com">// optional — may be undefined</span>
+}
+
+<span class="tok-kw">const</span> a<span class="tok-type">: User</span> = { id: 1, name: <span class="tok-str">"Ava"</span> }; <span class="tok-com">// OK, no nickname needed</span>
+<span class="tok-kw">const</span> b<span class="tok-type">: User</span> = { id: 2, name: <span class="tok-str">"Sam"</span>, nickname: <span class="tok-str">"S"</span> }; <span class="tok-com">// also OK</span></code></pre>
+
+  <h2>Try it yourself</h2>
+  <p>
+    Open the <a href="https://www.typescriptlang.org/play" target="_blank" rel="noopener">TypeScript
+    Playground</a> and paste the <code>User</code> interface and <code>printUser</code> function from
+    section 4. Try calling <code>printUser</code> with a missing property, or with <code>id: "1"</code>
+    instead of a number. Read the red squiggly error messages — that's TypeScript explaining exactly
+    what's wrong, in the same vocabulary you just learned.
+  </p>
+
+  <div class="ask">
+    <strong>Stuck or curious?</strong> Ask your AI teacher follow-up questions any time — e.g. "what
+    does <code>void</code> mean again?" or "show me another example of a union type." That's what
+    this workspace is for.
+  </div>
+
+  <div class="nav">
+    <span>Reference: <a href="../reference/0001-typescript-basics-cheatsheet.html">TypeScript Basics Cheat Sheet</a></span>
+    <span>Next lesson: functions, arrays of objects &amp; <code>any</code> vs <code>unknown</code> (coming soon)</span>
+  </div>
+</div>
+
+<script>
+document.querySelectorAll('.quiz').forEach(function (quiz) {
+  var optionsEl = quiz.querySelector('.options');
+  var feedback = quiz.querySelector('.feedback');
+  optionsEl.querySelectorAll('button').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var isCorrect = btn.getAttribute('data-correct') === 'true';
+      optionsEl.querySelectorAll('button').forEach(function (b) {
+        b.disabled = true;
+        if (b.getAttribute('data-correct') === 'true') b.classList.add('correct');
+      });
+      if (!isCorrect) btn.classList.add('incorrect');
+      feedback.textContent = isCorrect
+        ? 'Correct! ' + (btn.dataset.note || '')
+        : 'Not quite — the highlighted option is correct.';
+      feedback.className = 'feedback ' + (isCorrect ? 'good' : 'bad');
+    });
+  });
+});
+</script>
+</body>
+</html>
